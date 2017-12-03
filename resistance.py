@@ -26,7 +26,7 @@ class Resistance:
 	nResistance = 3
 
 
-	def __init__(self, name: ID, strat: str, nGame: Tuple[int, int]):
+	def __init__(self, name: ID, strat: str, nGame: Tuple[int, int] = (5, 3)):
 		"""
 		- name:      unique ID for the player
 		- strat:     a string identifying how the player will play the game
@@ -177,5 +177,23 @@ class Resistance:
 		return probOfSpies * probOfResistance
 
 ## Temporary Testing ##
+#  Test 1
+#  - The setup here is very silly since we're imagining everyone is resistance
+A = Resistance(0, "SIMPLE")
+B = Resistance(1, "SIMPLE")
+C = Resistance(2, "SIMPLE")
+D = Resistance(3, "SIMPLE")
 
+players = [A, B, C, D]
+names = ["A", "B", "C", "D"]
+for ix, player in enumerate(players):
+	player.initSuspicion(range(4))
+	print(f"Player {names[ix]} status: \n", player, "\n")
+
+# Imagine we start with players A, B going on a mission, and there is one failure observed
+# for ix, player in enumerate(players):
+# 	player.updateSuspicion({})
+
+
+#  Test 2
 ## ################# ##
