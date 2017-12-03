@@ -72,7 +72,7 @@ class Resistance:
 				self.suspicion[player] = float(nSpies/(Resistance.nPlayers - 1))
 
 
-	def updateSuspicion(self, voteResults: Dict[ID, Vote], spyStrat: str = "SIMPLE"):
+	def updateSuspicion(self, votes: List[Vote], missionList: List[ID], spyStrat: str = "SIMPLE"):
 		"""
 		Given the observed votes in the round, and a list of IDs for the players
 		who went on the mission, updates the player probability distribution
@@ -84,11 +84,11 @@ class Resistance:
 		# Holds posterior suspicions
 		post: Dict[ID, float] = {}
 
-		for player, prior in self.suspicion:
+		for player, prior in self.suspicion.items():
 			if player != self.name:
 				# Compute likelihood for being a spy
-				llhoodSpy: float = self.computeLikelihood(player, voteResults, spyStrat)
-				evidence: float = self.computeEvidence(voteResults, spyStrat)
+				llhoodSpy: float = self.computeLikelihood(player, votes, missionList, spyStrat)
+				evidence: float = self.computeEvidence(votes, missionList, spyStrat)
 
 				# Take the ratios scaled by the prior to get the posterior 
 				# probability of being a spy
@@ -100,12 +100,11 @@ class Resistance:
 		self.suspicion = {player:post[player] for player in post}
 		self.suspicion[self.name] = 0.0
 
-	def computeEvidence(self, voteResults: Dict[ID, Vote], spyStrat: str):
-		playerList: List[ID] = list(self.suspicion.keys)
-		missionList: List[ID] = list(voteResults.keys)
+	def computeEvidence(self, votes: List[Vote], missionList: List[ID], spyStrat: str):
+		playerList: List[ID] = list(self.suspicion.keys())
 
-		nFailures = len([voteResults[player] == False for player in voteResults])
-		missionSize = len(voteResults)
+		nFailures = len([vote == False for vote in votes])
+		missionSize = len(missionList)
 
 		nSpies = Resistance.nPlayers - Resistance.nResistance
 
@@ -121,16 +120,15 @@ class Resistance:
 		return evidence
 
 
-	def computeLikelihood(self, query: ID, voteResults: Dict[ID, Vote], spyStrat: str):
+	def computeLikelihood(self, query: ID, votes: Dict[ID, Vote], missionList: List[ID], spyStrat: str):
 		"""
 		Computes the likelihoods we would observe the input voteResults, given that
 		the query player was a spy or a resistance member respectively.
 		"""
-		playerList: List[ID] = list(self.suspicion.keys)
-		missionList: List[ID] = list(voteResults.keys)
+		playerList: List[ID] = list(self.suspicion.keys())
 
-		nFailures = len([voteResults[player] == False for player in voteResults])
-		missionSize = len(voteResults)
+		nFailures = len([vote == False for vote in votes])
+		missionSize = len(votes)
 
 		nSpies = Resistance.nPlayers - Resistance.nResistance
 
@@ -140,11 +138,11 @@ class Resistance:
 			## vote results is equal to the number of spies who went on the mission.
 			possWorlds = list(combinations(list(missionList), nFailures))
 
-			if (query in voteResults):
+			if (query in votes):
 				## Case where the query went on the mission
 				# Looking at all possible subsets of the people who went on the mission
 				# that could be spies
-				worldsOI = [x for x in possWorlds if query in x]
+				worldsOI = [list(x[:]) for x in possWorlds if query in x]
 				for world in worldsOI:
 					world.remove(query)
 
@@ -191,8 +189,9 @@ for ix, player in enumerate(players):
 	print(f"Player {names[ix]} status: \n", player, "\n")
 
 # Imagine we start with players A, B going on a mission, and there is one failure observed
-# for ix, player in enumerate(players):
-# 	player.updateSuspicion({})
+for ix, player in enumerate(players):
+	player.updateSuspicion([True, False], [0, 1])
+	print(f"Player {names[ix]} has updated status:\n", player, "\n")
 
 
 #  Test 2
