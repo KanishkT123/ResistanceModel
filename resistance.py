@@ -208,7 +208,7 @@ for ix, player in enumerate(players):
 # Imagine we start with players A, B going on a mission, and there is one failure observed
 for ix, player in enumerate(players):
 	# Just test the first player
-	if (ix == 2):
+	if (ix == 3):
 		player.updateSuspicion([True, False], [0, 1])
 		print(f"Player {names[ix]} has updated status:\n", player, "\n")
 
