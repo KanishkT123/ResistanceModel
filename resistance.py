@@ -6,7 +6,7 @@
 #################
 
 ## Imports ##
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Set
 from itertools import combinations
 from numpy import prod
 ## ####### ##
@@ -72,7 +72,7 @@ class Resistance:
 				self.suspicion[player] = float(nSpies/(Resistance.nPlayers - 1))
 
 
-	def updateSuspicion(self, votes: List[Vote], missionList: List[ID], spyStrat: str = "SIMPLE"):
+	def updateSuspicion(self, votes: List[Vote], missionList: Set[ID], spyStrat: str = "SIMPLE"):
 		"""
 		Given the observed votes in the round, and a list of IDs for the players
 		who went on the mission, updates the player probability distribution
@@ -90,15 +90,15 @@ class Resistance:
 				llhoodSpy: float = self.computeLikelihood(player, votes, missionList, spyStrat)
 
 				## Testing Stuff
-				print(f"Player with id {self.name} thinks that the probability of these votes \
-given that player with id {player} is a spy is {llhoodSpy}")
+# 				print(f"Player with ID {self.name} thinks that the probability of these votes \
+# given that player with id {player} is a spy is {llhoodSpy}")
 				
 
 				evidence: float = self.computeEvidence(votes, missionList, spyStrat)
 
 				## Testing Stuff
-				print(f"Player with id {self.name} thinks that the probability of these votes \
-overall is {llhoodSpy}")
+# 				print(f"Player with id {self.name} thinks that the probability of these votes \
+# overall is {llhoodSpy}")
 
 				# Take the ratios scaled by the prior to get the posterior 
 				# probability of being a spy
@@ -110,84 +110,140 @@ overall is {llhoodSpy}")
 		self.suspicion = {player:post[player] for player in post}
 		self.suspicion[self.name] = 0.0
 
-	def computeEvidence(self, votes: List[Vote], missionList: List[ID], spyStrat: str):
-		playerList: List[ID] = list(self.suspicion.keys())
+	def computeEvidence(self, votes: List[Vote], mission: Set[ID], spyStrat: str):
+		playerSet: Set[ID] = set(self.suspicion.keys())
 
 		nFailures = len([vote for vote in votes if vote == False])
-		missionSize = len(missionList)
+		missionSize = len(mission)
 
 		nSpies = Resistance.nPlayers - Resistance.nResistance
+
+		notMission = playerSet - mission
 
 		evidence = 0.0
 		if spyStrat == "SIMPLE":
 			## In this strategy, we assume that the number of failures in the
 			## vote results is equal to the number of spies who went on the mission.
-			possWorlds = list(combinations(list(missionList), nFailures))
+			spiesOnMissionPoss = list(combinations(mission, nFailures))
+			spiesNotOnMissionPoss = list(combinations(notMission, nSpies - nFailures))
 
-			for world in possWorlds:
-				evidence += self.probAssignment(world, missionList)
+			print("HELLO ", spiesOnMissionPoss)
+			print("BYE   ", spiesNotOnMissionPoss)
 
+			missionEvidence = 0.0
+			notMissionEvidence = 0.0
+
+			for world in spiesOnMissionPoss:
+				missionEvidence += self.probAssignment(world, mission)
+			for world in spiesNotOnMissionPoss:
+				notMissionEvidence += self.probAssignment(world, notMission)
+
+			evidence = missionEvidence * notMissionEvidence
+
+		print("Evidence: ", evidence)
 		return evidence
 
 
-	def computeLikelihood(self, query: ID, votes: Dict[ID, Vote], missionList: List[ID], spyStrat: str):
+	def computeLikelihood(self, query: ID, votes: List[Vote], mission: Set[ID], spyStrat: str):
 		"""
 		Computes the likelihoods we would observe the input voteResults, given that
 		the query player was a spy or a resistance member respectively.
 
 		Note that we never compute likelihood for ourselves.
 		"""
-		playerList: List[ID] = list(self.suspicion.keys())
-		print("List of IDs", playerList)
+		playerSet: Set[ID] = set(self.suspicion.keys())
+		print("List of IDs", playerSet)
 
 		nFailures = len([vote for vote in votes if vote == False])
-		print("Num Failures", nFailures)
+		# print("Num Failures", nFailures)
 		missionSize = len(votes)
-		print("Mission Size", missionSize)
+		# print("Mission Size", missionSize)
 
 		nSpies = Resistance.nPlayers - Resistance.nResistance
+
+		notMission = playerSet - mission
 
 		llhood = 0.0
 		if spyStrat == "SIMPLE":
 			## In this strategy, we assume that the number of failures in the
 			## vote results is equal to the number of spies who went on the mission.
-			possWorlds = list(combinations(list(missionList), nFailures))
+			spiesOnMissionPoss = list(combinations(mission, nFailures))
 
-			if (query in votes):
-				## Case where the query went on the mission
-				# Looking at all possible subsets of the people who went on the mission
-				# that could be spies
-				worldsOI = [list(x[:]) for x in possWorlds if query in x]
-				for world in worldsOI:
-					world.remove(query)
+			for world in spiesOnMissionPoss:
+				llhood += self.condAssignment(world, mission, query)
 
-				for world in worldsOI:
-					probWorld = self.probAssignment(world, missionList, {query})
-					llhood += probWorld
-			else:
-				## Case where the query did not go on the mission
-				worldsOI = possWorlds
-				scale = (nSpies - 1)/(nSpies - self.suspicion[query])
-				for world in worldsOI:
-					probWorld = scale * self.probAssignment(world, missionList)
-					llhood += probWorld
+		print("Likelihood: ", llhood)
+		return llhood
+
+			# if (query in votes):
+			# 	## Case where the query went on the mission
+			# 	# Looking at all possible subsets of the people who went on the mission
+			# 	# that could be spies
+			# 	worldsOI = [list(x[:]) for x in possWorlds if query in x]
+			# 	for world in worldsOI:
+			# 		world.remove(query)
+
+			# 	for world in worldsOI:
+			# 		probWorld = self.probAssignment(world, missionList, {query})
+			# 		llhood += probWorld
+			# else:
+			# 	## Case where the query did not go on the mission
+			# 	worldsOI = possWorlds
+			# 	scale = (nSpies - 1)/(nSpies - self.suspicion[query])
+			# 	for world in worldsOI:
+			# 		probWorld = scale * self.probAssignment(world, missionList)
+			# 		llhood += probWorld
 
 		return llhood
-	def probAssignment(self, spyList: List[ID], missionList: List[ID], ignore = set()):
+
+	def probAssignment(self, spies: Set[ID], group: Set[ID], ignore = set()):
 		"""
-		Given a list of spy candidates from an overall list of people who
+		Given a set of spy candidates from an overall list of people who
 		went on a mission, returns the probability exactly those candidates
 		are the spies on the mission.
 
 		Takes in an optional parameter ignore, which holds IDs that should be ignored
 		in calculations.
 		"""
-		probOfSpies =  prod([self.suspicion[candidate] for candidate in spyList])
+		probOfSpies =  prod([self.suspicion[candidate] for candidate in spies])
 		probOfResistance = 1.0
-		for player in missionList:
-			if (player not in spyList) and (player not in ignore):
+		for player in group:
+			if (player not in spies) and (player not in ignore):
 				probOfResistance = probOfResistance * (1 - self.suspicion[player])
 		
+		print("Spies: ", probOfSpies)
+		print("Resistance: ", probOfResistance)
+		return probOfSpies * probOfResistance
+
+
+	def condAssignment(self, spies: Set[ID], group: Set[ID], knownSpy: ID, ignore = set()):
+		"""
+		Given a set of spy candidates from an overall list of people who
+		went on a mission, returns the probability exactly those candidates
+		are the spies on the mission, conditional on the fact that a particular
+		individual is already known to be a spy.
+
+		Takes in an optional parameter ignore, which holds IDs that should be ignored
+		in calculations.
+		"""
+		conditioned = {}
+		nSpies = Resistance.nPlayers - Resistance.nResistance
+		scale = (nSpies - 1)/(nSpies - self.suspicion[knownSpy])
+		for name in self.suspicion:
+			if name == knownSpy:
+				conditioned[name] = 1.0
+			else:
+				conditioned[name] = scale * self.suspicion[name]
+
+		probOfSpies =  prod([conditioned[candidate] for candidate in spies])
+		probOfResistance = 1.0
+		for player in group:
+			if (player not in spies) and (player not in ignore):
+				probOfResistance = probOfResistance * (1 - conditioned[player])
+		
+		print(f"Conditioned on {knownSpy}")
+		print("Spies: ", probOfSpies)
+		print("Resistance: ", probOfResistance)
 		return probOfSpies * probOfResistance
 
 ## Temporary Testing ##
@@ -208,8 +264,8 @@ for ix, player in enumerate(players):
 # Imagine we start with players A, B going on a mission, and there is one failure observed
 for ix, player in enumerate(players):
 	# Just test the first player
-	if (ix == 3):
-		player.updateSuspicion([True, False], [0, 1])
+	if (ix == 0):
+		player.updateSuspicion([True, False], {0, 1})
 		print(f"Player {names[ix]} has updated status:\n", player, "\n")
 
 
