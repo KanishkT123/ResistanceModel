@@ -102,6 +102,9 @@ class Resistance:
 		self.suspicion[self.name] = 0.0
 
 	def computeEvidence(self, votes: List[Vote], mission: Set[ID], spyStrat: str):
+		"""
+		Computes the probability of observing a given set of votes. 
+		"""
 		# # print("#### EVIDENCE ####")
 
 		playerSet: Set[ID] = set(self.suspicion.keys())
@@ -128,10 +131,8 @@ class Resistance:
 
 	def computeLikelihood(self, query: ID, votes: List[Vote], mission: Set[ID], spyStrat: str):
 		"""
-		Computes the likelihoods we would observe the input voteResults, given that
-		the query player was a spy.
-
-		Note that we never compute likelihood for ourselves.
+		Computes the probability that we would see some votes and hat
+		the query is a spy.
 		"""
 		playerSet: Set[ID] = set(self.suspicion.keys())
 
@@ -180,7 +181,7 @@ class Resistance:
 
 
 ## Temporary Testing ##
-TESTING = True
+TESTING = False
 if TESTING:
 	#  Test 1
 	#  - The setup here is very silly since we're imagining everyone is resistance
