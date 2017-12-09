@@ -48,6 +48,7 @@ def game(nPlayers: int, rType: str, sTrype: str):
 		else:
 			Spy.suspicion[name] = 1
 
+	### Print what we just created
 	if TEST:
 		for r in resistance:
 			print(r)
