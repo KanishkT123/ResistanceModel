@@ -17,10 +17,11 @@ from random import sample
 ## ####### ##
 
 ### Constants Used Throughout ###
-TEST = True 
-VERB = True
+TEST = False 
+VERB = False
 
 NUM_ROUNDS = 5
+GAME_SIZES = range(5, 11)
 # Number of Players -> Number of Resistanc Members
 RESISTANCE_NUMS: Dict[int, int] = {5: 3, 6: 4, 7: 4, 8: 5, 9: 6, 10: 6}
 # Number of Players -> Mission Sizes
@@ -184,11 +185,13 @@ def game(nPlayers: int, rType: str = "SIMPLE", sType: str = "SIMPLE", gType: str
 	
 
 ### User Input ###
-stats = []
-while True:
-	x = game(5, "SIMPLE", "SIMPLE")
-	if x[0] == True:
-		break
-stats.append(x)
-if VERB:
-	print(stats)
+ITERATIONS = 1000
+stats: List[List[Tuple[int]]] = [[] for j in GAME_SIZES]
+for size in GAME_SIZES:
+	for j in range(ITERATIONS):
+		x = game(size, "SIMPLE", "SIMPLE")
+		stats[size - GAME_SIZES[0]].append(x)
+
+
+
+
