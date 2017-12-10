@@ -43,14 +43,19 @@ def game(nPlayers: int, rType: str = "SIMPLE", sType: str = "SIMPLE", gType: str
 	players: List[ID] = range(nPlayers)
 	randSpec = sample(set(combinations(players, RESISTANCE_NUMS[nPlayers])), 1)[0]
 	randSet = {x for x in randSpec}
+	
 	resistance: List = []
 	spies: List = []
+	rIDs = set()
+	sIDs = set()
 
 	for name in players:
 		if name in randSet:
-			resistance.append(Resistance(name, rType))
+			resistance.append(Resistance(name, rType, (nPlayers, RESISTANCE_NUMS[nPlayers])))
+			rIDs.add(name)
 		else:
-			spies.append(Spy(name, sType))
+			spies.append(Spy(name, sType, (nPlayers, RESISTANCE_NUMS[nPlayers])))
+			sIDs.add(name)
 
 	# Initialize Player Setups
 	# - Setup resistance supsicions
@@ -75,9 +80,13 @@ def game(nPlayers: int, rType: str = "SIMPLE", sType: str = "SIMPLE", gType: str
 
 	## Main Game Loop ##
 	rWins, sWins = (0, 0)
-
-	for rnd in range(NUM_ROUNDS):
-		if gType == "RANDOM":
+	winner = False # Corresponds to spies winning
+	
+	########
+	#RANDOM#
+	########
+	if gType == "RANDOM":
+		for rnd in range(NUM_ROUNDS):
 			if TEST:
 				print(f"\n-- Round Number {rnd + 1} --")
 
@@ -101,20 +110,85 @@ def game(nPlayers: int, rType: str = "SIMPLE", sType: str = "SIMPLE", gType: str
 			# -Voting on Teams - We Always Accept (nothing here)
 
 			# Mission Vote
+			# This is omitted in this part, since things are deterministic
 
+			# Score Update - Could Probably be moved to another function
+			danger: int = len(sIDs & teamIDs)
+			if (nPlayers, rnd) in SPECIAL_MISSIONS:
+				if danger > 1:
+					sWins += 1
+				else:
+					rWins += 1
+			else:
+				if danger > 0:
+					sWins += 1
+				else:
+					rWins += 1
+			
 			# Check Termination Conditions
+			if (rWins > 2):
+				if VERB:
+					print("\n Resistance Wins!\n")
+				winner = True
+				break
+				# return True
 
+			elif (sWins > 2):
+				if VERB:
+					print("\n Spies Win!\n")
+				break
+				# return False
+			
 			# Update Suspicions
+			votes = [False]*danger + [True]*(len(teamIDs) - danger)
+			for r in resistance:
+				r.updateSuspicion(votes, teamIDs)
 
+		
 
+		## Game Finish ##
+		if VERB:
+			print("The final states were: ")
+			print("\n--- Resistance Members ---")
+			for r in resistance:
+				print(r)
+		## Get Statistics on How Long it takes to figure out spy identities
+		"""
+		We will return 
+		(winner, finRound, perfects, atLeastOne),
+		where
+		- winner: True if Resistance won, False if Spies won
+		- finRound: The Round at which the game terminated
+		- perfects: The Number of Resistance members that figured out all spy identities
+		- atLeastOne: The Number of resistance members that figured out at least one spy identity
+		"""
 
-	# -Team Voting
-
-	# - Mission Voting
-
-
-
+		perfects = 0
+		atLeastOne = 0
+		
+		for r in resistance:
+			info = 0
+			susp = r.suspicion
+			for x in susp:
+				if abs(susp[x] - 1.0) < 10**(-20):
+					info += 1
+			if (info == (Resistance.nPlayers - Resistance.nResistance)):
+				perfects += 1
+			if (info > 0):
+				atLeastOne += 1
+		
+		return (winner, rnd+1, perfects, atLeastOne)
+	############
+	#END RANDOM#
+	############
 	
 
 ### User Input ###
-game(5, "SIMPLE", "SIMPLE")
+stats = []
+while True:
+	x = game(5, "SIMPLE", "SIMPLE")
+	if x[0] == True:
+		break
+stats.append(x)
+if VERB:
+	print(stats)
