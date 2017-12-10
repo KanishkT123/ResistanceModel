@@ -22,6 +22,7 @@ VERB = False
 
 NUM_ROUNDS = 5
 GAME_SIZES = range(5, 11)
+SIZES = len(GAME_SIZES)
 # Number of Players -> Number of Resistanc Members
 RESISTANCE_NUMS: Dict[int, int] = {5: 3, 6: 4, 7: 4, 8: 5, 9: 6, 10: 6}
 # Number of Players -> Mission Sizes
@@ -185,12 +186,59 @@ def game(nPlayers: int, rType: str = "SIMPLE", sType: str = "SIMPLE", gType: str
 	
 
 ### User Input ###
-ITERATIONS = 1000
-stats: List[List[Tuple[int]]] = [[] for j in GAME_SIZES]
-for size in GAME_SIZES:
-	for j in range(ITERATIONS):
-		x = game(size, "SIMPLE", "SIMPLE")
-		stats[size - GAME_SIZES[0]].append(x)
+
+# ### Random - Random case
+# # Collecting data
+# ITERATIONS = 2000
+# stats: List[List[Tuple[int]]] = [[] for j in GAME_SIZES]
+# for size in GAME_SIZES:
+# 	for j in range(ITERATIONS):
+# 		x = game(size, "SIMPLE", "SIMPLE")
+# 		stats[size - GAME_SIZES[0]].append(x)
+
+# # Getting Counts
+# nResistWins = [0 for j in GAME_SIZES]
+# finRounds = [{3: 0, 4: 0, 5: 0} for j in GAME_SIZES]
+# finRoundsResistance = [{3: 0, 4: 0, 5: 0} for j in GAME_SIZES]
+# finRoundsSpies = [{3: 0, 4: 0, 5: 0} for j in GAME_SIZES]
+# perfectArr = [{} for j in GAME_SIZES]
+# atLeastOneArr = [{} for j in GAME_SIZES]
+# for j in range(SIZES):
+# 	for instance in stats[j]:
+# 		# Counting Wins and Subdivided Rounds to Win
+# 		if instance[0] == True:
+# 			nResistWins[j] += 1
+# 			finRoundsResistance[j][instance[1]] += 1
+# 		else:
+# 			finRoundsSpies[j][instance[1]] += 1
+# 		# Counting Number of Rounds to Win
+# 		finRounds[j][instance[1]] += 1
+# 		# Counting Number of Perfects
+# 		if instance[2] in perfectArr[j]:
+# 			perfectArr[j][instance[2]] += 1
+# 		else:
+# 			perfectArr[j][instance[2]] = 1
+# 		# Counting Number of At Least Ones
+# 		if instance[3] in atLeastOneArr[j]:
+# 			atLeastOneArr[j][instance[3]] += 1
+# 		else:
+# 			atLeastOneArr[j][instance[3]] = 1
+
+# s = ""
+# s += f"Number of Resistance Wins: \n {nResistWins} \n\
+# Numbers of Ending Rounds: \n {finRounds} \n\
+# Numbers of Resistance Ending Rounds: \n {finRoundsResistance} \n\
+# Numbers of Spy Ending Rounds: \n {finRoundsSpies} \n\
+# Number of perfects: \n {perfectArr} \n\
+# Number of at least ones: \n {atLeastOneArr} \n"
+
+# RAND_STATS_FNAME = "randomstats.txt"
+# randStats = open(RAND_STATS_FNAME, 'w')
+# randStats.write(s)
+# randStats.close()
+
+
+
 
 
 
