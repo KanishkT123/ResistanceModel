@@ -178,6 +178,13 @@ class Resistance:
 		# print("Resistance: ", probOfResistance)
 		return probOfSpies * probOfResistance
 
+	def selectTeam(self, size: int, strat = "INTEL", special = False):
+		"""
+		Outputs the set of IDs corresponding to the least suspicious players.
+		"""
+		allIDs = self.suspicion.keys()
+		return set(sorted(allIDs, key = lambda x: self.suspicion[x])[0:size])
+
 
 
 ## Temporary Testing ##

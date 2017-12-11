@@ -47,3 +47,16 @@ class Spy:
 		\n- ID: {self.name} \
 		\n- Strategy: {self.strat} "
 		return rep
+
+	def selectTeam(self, size: int, strat = "INTEL", special = False):
+		allIDs = set(Spy.suspicion.keys())
+		if (strat == "INTEL"):
+			# Case where we need at least two spies to fail.
+			if special:
+
+			# Case where we just need on spy to fail.
+			else:
+		elif (strat == "SELF"):
+			# Just pick self, and randomly elsewhere
+		else:
+			# Just pick completely at random
