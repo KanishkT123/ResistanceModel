@@ -329,9 +329,9 @@ def game(nPlayers: int, rType: str = "SIMPLE", sType: str = "SIMPLE", gType: str
 
 				# Voting on the Team - assume spies approve
 				votesFor = 0
-				threshold = 0.8
+				threshold = 0.4
 				if isSpecial:
-					threshold = 1.6
+					threshold = 0.8
 				for player in resistance:
 					if player.judgeTeam(teamIDs, threshold):
 						votesFor += 1
@@ -469,7 +469,7 @@ Numbers of Spy Ending Rounds: \n {finRoundsSpies} \n\
 Number of perfects: \n {perfectArr} \n\
 Number of at least ones: \n {atLeastOneArr} \n"
 
-COMPLEX_STATS_FNAME = "complexStats-0.8.txt"
+COMPLEX_STATS_FNAME = "complexStats-0.4.txt"
 bothStats = open(COMPLEX_STATS_FNAME, 'w')
 bothStats.write(s)
 bothStats.close()
