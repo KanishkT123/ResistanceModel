@@ -216,9 +216,177 @@ def game(nPlayers: int, rType: str = "SIMPLE", sType: str = "SIMPLE", gType: str
 			for r in resistance:
 				r.updateSuspicion(votes, teamIDs)
 
-	######
-	#TEAM#
-	######
+	##########
+	#END TEAM#
+	##########
+
+	#######
+	#INTEL#
+	#######
+	# Case of resistance is intelligence, and spies are too
+	elif gType == "INTEL":
+		for rnd in range(NUM_ROUNDS):
+			if TEST:
+				print(f"\n-- Round Number {rnd + 1} --")
+
+			# -Team Selection is Intelligent for Resistance, not for Spies
+			# Get the leader
+			leaderID = rnd
+			leader = False
+			for player in resistance:
+				if player.name == leaderID:
+					leader = player
+			for player in spies:
+				if player.name == leaderID:
+					leader = player
+
+			# Get Team - this is literally the only place where the code changed.
+			# This should certainly be cleaned up.
+			isSpecial = (nPlayers, rnd) in SPECIAL_MISSIONS 
+			teamIDs = leader.selectTeam(MISSION_NUMS[nPlayers][rnd], "INTEL", isSpecial) 
+			if VERB: 
+				print(teamIDs)
+
+			# The current array of people going on the mission
+			team = []
+			for r in resistance:
+				if r.name in teamIDs:
+					team.append(r)
+			for s in spies:
+				if s.name in teamIDs:
+					team.append(s)
+
+			# Score Update - Could Probably be moved to another function
+			danger: int = len(sIDs & teamIDs)
+			if (nPlayers, rnd) in SPECIAL_MISSIONS:
+				if danger > 1:
+					sWins += 1
+				else:
+					rWins += 1
+			else:
+				if danger > 0:
+					sWins += 1
+				else:
+					rWins += 1
+
+			# Check Termination Conditions
+			if (rWins > 2):
+				if VERB:
+					print("\n Resistance Wins!\n")
+				winner = True
+				break
+				# return True
+
+			elif (sWins > 2):
+				if VERB:
+					print("\n Spies Win!\n")
+				break
+				# return False
+			
+			# Update Suspicions
+			votes = [False]*danger + [True]*(len(teamIDs) - danger)
+			for r in resistance:
+				r.updateSuspicion(votes, teamIDs)
+
+	###########
+	#END INTEL#
+	###########
+
+	#########
+	#COMPLEX#
+	#########
+	# Case where people are intelligent, and resistance
+	# will downvote teams that are too suspicious. 
+	elif gType == "COMPLEX":
+		leaderID = 0
+		for rnd in range(NUM_ROUNDS):
+			if TEST:
+				print(f"\n-- Round Number {rnd + 1} --")
+
+			# -Team Selection is Intelligent 
+			teamFails = 0
+			teamIDs = set() # defined in the loop below
+			while True:
+				# Get the leader
+				leader = False
+				for player in resistance:
+					if player.name == leaderID:
+						leader = player
+				for player in spies:
+					if player.name == leaderID:
+						leader = player
+
+				# Get Team - this is literally the only place where the code changed.
+				# This should certainly be cleaned up.
+				isSpecial = (nPlayers, rnd) in SPECIAL_MISSIONS 
+				teamIDs = leader.selectTeam(MISSION_NUMS[nPlayers][rnd], "INTEL", isSpecial) 
+				if VERB: 
+					print(teamIDs)
+
+				if (teamFails == 4):
+					# Team is always approved on the fifth time around
+					break
+
+				# Voting on the Team - assume spies approve
+				votesFor = 0
+				threshold = 0.8
+				if isSpecial:
+					threshold = 1.6
+				for player in resistance:
+					if player.judgeTeam(teamIDs, threshold):
+						votesFor += 1
+
+				if (2*votesFor > MISSION_NUMS[nPlayers][rnd]):
+					# Corresponds to team being approved
+					break
+				else:
+					# Corresponds to team not being approved
+					teamFails += 1
+					leaderID = (leaderID + 1) % nPlayers
+
+			# The current array of people going on the mission
+			team = []
+			for r in resistance:
+				if r.name in teamIDs:
+					team.append(r)
+			for s in spies:
+				if s.name in teamIDs:
+					team.append(s)
+
+			# Score Update - Could Probably be moved to another function
+			danger: int = len(sIDs & teamIDs)
+			if (nPlayers, rnd) in SPECIAL_MISSIONS:
+				if danger > 1:
+					sWins += 1
+				else:
+					rWins += 1
+			else:
+				if danger > 0:
+					sWins += 1
+				else:
+					rWins += 1
+
+			# Check Termination Conditions
+			if (rWins > 2):
+				if VERB:
+					print("\n Resistance Wins!\n")
+				winner = True
+				break
+				# return True
+
+			elif (sWins > 2):
+				if VERB:
+					print("\n Spies Win!\n")
+				break
+				# return False
+			
+			# Update Suspicions
+			votes = [False]*danger + [True]*(len(teamIDs) - danger)
+			for r in resistance:
+				r.updateSuspicion(votes, teamIDs)
+
+			# Get next Team Leader
+			leaderID = (leaderID + 1) % nPlayers
 		
 	## Game Finish ##
 	if VERB:
@@ -256,13 +424,13 @@ def game(nPlayers: int, rType: str = "SIMPLE", sType: str = "SIMPLE", gType: str
 
 ### User Input ###
 
-### TEAM - Resistance Intelligence Case (Spies not)
+### TEAM - Resistance and Spies Intelligence Case
 # Colecting data
 ITERATIONS = 2000
 stats: List[List[Tuple[int]]] = [[] for j in GAME_SIZES]
 for size in GAME_SIZES:
 	for j in range(ITERATIONS):
-		x = game(size, "TEAM", "TEAM", "TEAM")
+		x = game(size, "COMPLEX", "COMPLEX", "COMPLEX")
 		stats[size - GAME_SIZES[0]].append(x)
 
 # Getting Counts
@@ -301,10 +469,25 @@ Numbers of Spy Ending Rounds: \n {finRoundsSpies} \n\
 Number of perfects: \n {perfectArr} \n\
 Number of at least ones: \n {atLeastOneArr} \n"
 
-TEAM_STATS_FNAME = "resistance-intel.txt"
-intelStats = open(TEAM_STATS_FNAME, 'w')
-intelStats.write(s)
-intelStats.close()
+COMPLEX_STATS_FNAME = "complexStats-0.8.txt"
+bothStats = open(COMPLEX_STATS_FNAME, 'w')
+bothStats.write(s)
+bothStats.close()
+
+# COMPLEX_STATS_FNAME = "complexStats.txt"
+# bothStats = open(COMPLEX_STATS_FNAME, 'w')
+# bothStats.write(s)
+# bothStats.close()
+
+# INTEL_STATS_FNAME = "both-intel.txt"
+# bothStats = open(INTEL_STATS_FNAME, 'w')
+# bothStats.write(s)
+# bothStats.close()
+
+# TEAM_STATS_FNAME = "resistance-intel.txt"
+# intelStats = open(TEAM_STATS_FNAME, 'w')
+# intelStats.write(s)
+# intelStats.close()
 
 # ### Random - Random case
 # # Collecting data

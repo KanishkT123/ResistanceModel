@@ -62,7 +62,7 @@ class Spy:
 				return self.selectTeam(size, "SELF")
 		elif (strat == "SELF"):
 			# Just pick self, and randomly elsewhere
-			team = set(sample(allIds - {self.name}, size - 1))
+			team = set(sample(allIDs - {self.name}, size - 1))
 			team.add(self.name)
 			return team
 		else:

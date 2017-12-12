@@ -187,6 +187,15 @@ class Resistance:
 		allIDs = self.suspicion.keys()
 		return set(sorted(allIDs, key = lambda x: self.suspicion[x])[0:size])
 
+	def judgeTeam(self, teamIDs: Set[ID], threshold: int = 1.0):
+		"""
+		True corresponds to deeming the team acceptable.
+		"""
+		totalSketchiness = 0.0
+		for name in teamIDs:
+			totalSketchiness += self.suspicion[name]
+		return (totalSketchiness <= threshold)
+
 
 
 ## Temporary Testing ##
