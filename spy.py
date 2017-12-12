@@ -7,6 +7,7 @@
 
 ## Imports ##
 from typing import Dict, List, Tuple, Set
+from random import sample
 ## ####### ##
 
 ## Some Typing ##
@@ -53,10 +54,17 @@ class Spy:
 		if (strat == "INTEL"):
 			# Case where we need at least two spies to fail.
 			if special:
-
+				allSpyIDs = set([x for x in allIDs if (Spy.suspicion[x] == 1)])
+				allResistanceIDs = set([x for x in allIDs if (Spy.suspicion[x] == 0)])
+				return set(sample(allSpyIDs, 2)) ^ set(sample(allResistanceIDs, size - 2))
 			# Case where we just need on spy to fail.
 			else:
+				return self.selectTeam(size, "SELF")
 		elif (strat == "SELF"):
 			# Just pick self, and randomly elsewhere
+			team = set(sample(allIds - {self.name}, size - 1))
+			team.add(self.name)
+			return team
 		else:
 			# Just pick completely at random
+			return set(sample(allIDs, size))

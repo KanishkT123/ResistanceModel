@@ -9,6 +9,7 @@
 from typing import Dict, List, Tuple, Set
 from itertools import combinations, product
 from numpy import prod
+from random import sample
 ## ####### ##
 
 ## Some Typing ##
@@ -181,6 +182,7 @@ class Resistance:
 	def selectTeam(self, size: int, strat = "INTEL", special = False):
 		"""
 		Outputs the set of IDs corresponding to the least suspicious players.
+		We ignore the strat argument.
 		"""
 		allIDs = self.suspicion.keys()
 		return set(sorted(allIDs, key = lambda x: self.suspicion[x])[0:size])
