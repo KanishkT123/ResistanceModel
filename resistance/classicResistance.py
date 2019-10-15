@@ -1,6 +1,6 @@
-from player import player
+import common.player as Player
 
-class classicResistance(player):
+class classicResistance(Player):
     """Classic Resistance Member
     Tries to make fair assumptions about others
     Is only capable of voting yes (As are all resistance)
@@ -16,10 +16,12 @@ class classicResistance(player):
         Resistance players can only succeed missions """
         return True
     
-    def choose(self, n):
+    def chooseMission(self, n):
         """Public Method: 
         Input: Int n <= playerCount
         Output: List of chosenPlayers
         The resistance player attempts to choose
         a team of n players to go on a mission
         """
+        #Placeholder
+        return n
