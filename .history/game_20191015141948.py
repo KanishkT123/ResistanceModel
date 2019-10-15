@@ -3,7 +3,6 @@ class Mission:
     def __init__(self, takingPart, successes, failsNeeded):
         self.takingPart = takingPart
         self.successes = successes
-        self.failsNeeded = failsNeeded
     
 class GameRunner:
     """The game runner class for Resistance
@@ -27,30 +26,18 @@ class GameRunner:
             raise Ex
         
         self.__missionGenerator()
-        
 
 
-    def __missionGenerator(self):
+    def __missionGenerator(players=self.players):
         """Private method:
         Input: Int #Players
         Output: Int List of players on each mission
         Generates missions for the gameRunner using number of players"""
-        players = self.players
-
         if players == 5:
-            participating = [2,3,2,3,3]
-            self.missions = [Mission(x, 0, 1) for x in participating]
-
+            return [2,3,2,3,3]
         if players == 6:
-            participating = [2,3,4,3,4]
-            self.missions = [Mission(x, 0, 1) for x in participating]
-
+            return [2,3,4,3,4]
         if players == 7:
-            participating = [2,3,3,4,4]
-        
+            return [2,3,3,4,4]
         else:
-            participating = [3,4,4,5,5]
-    
-        self.missions = [Mission(participating[i], 0, 1) if i <=5 
-                        else Mission(participating[i],0,2) 
-                        for i in range(5)]   
+            return [3,4,4,5,5]

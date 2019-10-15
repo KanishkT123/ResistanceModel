@@ -27,7 +27,6 @@ class GameRunner:
             raise Ex
         
         self.__missionGenerator()
-        
 
 
     def __missionGenerator(self):
@@ -36,7 +35,6 @@ class GameRunner:
         Output: Int List of players on each mission
         Generates missions for the gameRunner using number of players"""
         players = self.players
-
         if players == 5:
             participating = [2,3,2,3,3]
             self.missions = [Mission(x, 0, 1) for x in participating]
