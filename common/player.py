@@ -13,3 +13,11 @@ class Player(ABC):
     @abstractmethod
     def chooseMission(self):
         pass
+
+    @abstractmethod
+    def vote(self, playersGoing):
+        pass
+
+    @abstractmethod
+    def consumeResult(self, playersGoing, success):
+        pass

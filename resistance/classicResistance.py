@@ -11,12 +11,12 @@ class classicResistance(Player):
         super().__init__(myID, playerIDList)
         self.playerTrust = defaultdict(float)
         self.playerTrust[self.ID] = 100
-    
+
     def play(self):
         """Public Method: The resistance player goes on a mission
         Resistance players can only succeed missions """
         return True
-    
+
     def chooseMission(self, n):
         """Public Method: 
         Input: Int n <= playerCount
@@ -27,5 +27,17 @@ class classicResistance(Player):
         #Sort the defaultDict
         finalList = sorted(self.playerTrust.items(), key=lambda k_v:k_v[1][2])
         return finalList[:n]
-    
-    
+
+    def updateTrust(self, missionPlayers, success):
+        """Public Method:
+        Inputs: missionPlayers is a list of the players on the mission
+        Success is a bool reflecting whether the mission was successful
+        Output: null
+        The resistance player updates their trust indices after a mission"""
+        #Always trust yourself 
+        try:
+            otherPlayers = missionPlayers.remove(self.ID)
+        except:
+            otherPlayers = missionPlayers
+        
+        
