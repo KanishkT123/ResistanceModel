@@ -2,8 +2,9 @@ from abc import ABC, abstractmethod
 
 class Player(ABC):
     @abstractmethod
-    def __init__(self, playerCount):
-        self.playerCount = playerCount
+    def __init__(self, myID, playerIDList):
+        self.ID = myID
+        self.playerIDList = playerIDList
     
     @abstractmethod
     def play(self):

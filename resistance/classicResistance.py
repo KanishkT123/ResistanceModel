@@ -1,4 +1,5 @@
 from common import Player
+from collections import defaultdict
 class classicResistance(Player):
     """Classic Resistance Member
     Tries to make fair assumptions about others
@@ -6,9 +7,10 @@ class classicResistance(Player):
     Picks highest trust players to go on missions
     Breaks ties randomly
     """
-    def __init__(self, playerCount):
-        super().__init__(playerCount)
-        playerTrust = [0.0 for x in range(self.playerCount)]
+    def __init__(self, myID, playerIDList):
+        super().__init__(myID, playerIDList)
+        self.playerTrust = defaultdict(float)
+        self.playerTrust[self.ID] = 100
     
     def play(self):
         """Public Method: The resistance player goes on a mission
@@ -22,5 +24,8 @@ class classicResistance(Player):
         The resistance player attempts to choose
         a team of n players to go on a mission
         """
-        #Placeholder
-        return n
+        #Sort the defaultDict
+        finalList = sorted(self.playerTrust.items(), key=lambda k_v:k_v[1][2])
+        return finalList[:n]
+    
+    
