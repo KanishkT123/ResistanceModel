@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 class Player(ABC):
+    
     @abstractmethod
     def __init__(self, playerCount):
         self.playerCount = playerCount

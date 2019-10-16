@@ -1,4 +1,4 @@
-import common.player as Player
+from .common.player import Player
 
 class classicResistance(Player):
     """Classic Resistance Member
