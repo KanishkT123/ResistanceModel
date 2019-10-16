@@ -1,5 +1,4 @@
-import common.player as Player
-
+from common import Player
 class classicResistance(Player):
     """Classic Resistance Member
     Tries to make fair assumptions about others

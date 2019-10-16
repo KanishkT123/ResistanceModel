@@ -1,1 +1,1 @@
-from . import classicResistance
+from .classicResistance import classicResistance

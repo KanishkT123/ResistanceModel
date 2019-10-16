@@ -1,1 +1,1 @@
-from . import player
+from .player import Player
