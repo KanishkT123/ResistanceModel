@@ -1,3 +1,6 @@
+from random import sample
+from resistance.classicResistance import classicResistance
+
 SPIES = [2,2,3,3,3,4]
 
 class Mission:
@@ -24,12 +27,12 @@ class GameRunner:
         #Private members
         self.__spies = []
         self.__resistance = []
-        
+
         if self.playerCount < 5 or self.playerCount > 10:
             Ex = ValueError()
             Ex.strerror = "Player value must be within 5 and 10, inclusive"
             raise Ex
-        
+
         self.__missionGenerator()
         self.__playerGenerator()
 
@@ -49,10 +52,10 @@ class GameRunner:
 
         if playerCount == 7:
             participating = [2,3,3,4,4]
-        
+
         else:
             participating = [3,4,4,5,5]
-    
+
         self.missions = [Mission(participating[i], 0, 1) if i <=5 
                         else Mission(participating[i],0,2) 
                         for i in range(5)]   
@@ -63,4 +66,13 @@ class GameRunner:
         self.spyCount = SPIES[self.playerCount - 5]
         self.resistanceCount = self.playerCount - self.spyCount
 
-        #Code for generating spies and resistance here
+        IDs = sample(range(0,10), self.playerCount)
+        playerDict = {}
+
+        for i in range(self.playerCount):
+            if i >= resistanceCount:
+                newSpy = Spy(IDs[i], IDs)
+                playerDict[IDs[i]] = newSpy
+            else: 
+                newResistance = classicResistance(IDs[i], IDs)
+                playerDict[IDs[i]] = newResistance
