@@ -70,4 +70,3 @@ class classicResistance(Player):
     
     def consumeResult(self, playersGoing, success):
         __updateTrust(self, playersGoing, success)
-    
