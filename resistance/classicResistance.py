@@ -1,4 +1,7 @@
 from common import Player
+from collections import defaultdict
+from random import random
+
 class classicResistance(Player):
     """Classic Resistance Member
     Tries to make fair assumptions about others
@@ -6,15 +9,20 @@ class classicResistance(Player):
     Picks highest trust players to go on missions
     Breaks ties randomly
     """
-    def __init__(self, playerCount):
-        super().__init__(playerCount)
-        playerTrust = [0.0 for x in range(self.playerCount)]
-    
+    def __init__(self, myID, playerIDList):
+        super().__init__(myID, playerIDList)
+        #Resistance Player only trusts themselves at the start
+        self.playerTrust = defaultdict(float)
+        self.playerTrust[self.ID] = 100
+
+        #Randomize how much each new mission changes trust criteria
+        self.alpha = random()
+
     def play(self):
         """Public Method: The resistance player goes on a mission
         Resistance players can only succeed missions """
         return True
-    
+
     def chooseMission(self, n):
         """Public Method: 
         Input: Int n <= playerCount
@@ -22,5 +30,44 @@ class classicResistance(Player):
         The resistance player attempts to choose
         a team of n players to go on a mission
         """
-        #Placeholder
-        return n
+        #Sort the defaultDict
+        finalList = sorted(self.playerTrust.items(), key=lambda k_v:k_v[1][2])
+        return finalList[:n]
+
+    def __updateTrust(self, playersGoing, success):
+        """Public Method:
+        Inputs: playersGoing is a list of the players on the mission
+        Success is a bool reflecting whether the mission was successful
+        Output: null
+        The resistance player updates their trust indices after a mission"""
+        #Always trust yourself: Remove yourself from trust pool
+        try:
+            otherPlayers = playersGoing.remove(self.ID)
+        except:
+            otherPlayers = playersGoing
+
+        outcomeScore = 0.0
+        if success:
+            outcomeScore = 100.0
+        else:
+            outcomeScore = -100.0
+        
+        perPlayerMagnitude = outcomeScore/len(otherPlayers)
+
+        for player in otherPlayers:
+            oldTrust = self.playerTrust[player]
+            newTrust = self.alpha*perPlayerMagnitude + oldTrust
+            
+            #Edge cases handled
+            #Failed 2P Mission including me: The other is a spy
+            if perPlayerMagnitude == -100:
+                newTrust = -100
+            #Previously decided the player is a Spy
+            if oldTrust <= -100:
+                newTrust = oldTrust
+            
+            self.playerTrust[player] = newTrust
+    
+    def consumeResult(self, playersGoing, success):
+        __updateTrust(self, playersGoing, success)
+    
