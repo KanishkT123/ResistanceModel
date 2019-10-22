@@ -1,5 +1,4 @@
 from common import Player
-from collections import defaultdict
 from random import random
 
 class classicResistance(Player):
@@ -11,9 +10,10 @@ class classicResistance(Player):
     """
     def __init__(self, myID, playerIDList):
         super().__init__(myID, playerIDList)
+        
         #Resistance Player only trusts themselves at the start
-        self.playerTrust = defaultdict(float)
-        self.playerTrust[self.ID] = 100
+        self.playerTrust = {ID:0.0 for ID in playerIDList}
+        self.playerTrust[myID] = 100.0
 
         #Randomize how much each new mission changes trust criteria
         self.alpha = random()
@@ -21,6 +21,10 @@ class classicResistance(Player):
     def play(self):
         """Public Method: The resistance player goes on a mission
         Resistance players can only succeed missions """
+        return True
+    
+    def reveal(self):
+        """Public Method: The resistance player reveals their role"""
         return True
 
     def chooseMission(self, n):
@@ -30,11 +34,13 @@ class classicResistance(Player):
         The resistance player attempts to choose
         a team of n players to go on a mission
         """
-        #Sort the defaultDict
-        finalList = sorted(self.playerTrust.items(), key=lambda k_v:k_v[1][2])
+        #Sort the defaultDict according to descending trust
+        finalList = sorted(self.playerTrust.items(), 
+                           key=lambda k_v:k_v[1],
+                           reverse = True)
         return finalList[:n]
 
-    def __updateTrust(self, playersGoing, success):
+    def __updateTrust(self, playersGoing, success, outcome):
         """Public Method:
         Inputs: playersGoing is a list of the players on the mission
         Success is a bool reflecting whether the mission was successful
@@ -68,6 +74,6 @@ class classicResistance(Player):
             
             self.playerTrust[player] = newTrust
     
-    def consumeResult(self, playersGoing, success):
-        __updateTrust(self, playersGoing, success)
+    def consumeResult(self, playersGoing, successes, outcome):
+        __updateTrust(self, playersGoing, successes, outcome)
     

@@ -19,5 +19,9 @@ class Player(ABC):
         pass
 
     @abstractmethod
-    def consumeResult(self, playersGoing, success):
+    def consumeResult(self, playersGoing, successes, outcome):
+        pass
+
+    @abstractmethod
+    def reveal(self):
         pass
